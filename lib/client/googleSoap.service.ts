@@ -1,14 +1,15 @@
 import { BearerSecurity, Client, createClientAsync } from 'soap';
-
-import { GoogleSoapServiceOptions, ImportClass } from '../common/types';
 import { API_VERSION, SERVICE_MAP } from '../common/constants';
+import { GoogleSoapServiceOptions, ImportClass, ProxyConfig } from '../common/types';
 import { promiseFromCallback } from '../common/utils';
+import { ProxyService } from '../common/utils/proxy.service';
 
 export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
   private networkCode: number;
   private applicationName: string;
   private service: T;
   private token: string;
+  private proxy?: ProxyConfig;
   private _client: Client;
 
   constructor(service: T, options: GoogleSoapServiceOptions) {
@@ -16,11 +17,21 @@ export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
     this.applicationName = options.applicationName;
     this.networkCode = options.networkCode;
     this.token = options.token;
+    this.proxy = options.proxy;
   }
 
   public async createClient(): Promise<ImportClass<typeof SERVICE_MAP, T>> {
     const serviceUrl = `https://ads.google.com/apis/ads/publisher/${API_VERSION}/${this.service}?wsdl`;
-    const client = await createClientAsync(serviceUrl);
+
+    const client = await (async () => {
+      if (this.proxy) {
+        return await createClientAsync(serviceUrl, {
+          request: ProxyService.getProxyInstance(this.proxy),
+        });
+      }
+      return await createClientAsync(serviceUrl);
+    })();
+
     client.addSoapHeader(this.getSoapHeaders());
     client.setToken = function setToken(token: string) {
       client.setSecurity(new BearerSecurity(token));

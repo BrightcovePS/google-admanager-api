@@ -1,7 +1,7 @@
-import { DEFAULT_APPLICATION_NAME, SERVICE_MAP } from '../common/constants';
-import { GoogleSoapService } from './googleSoap.service';
-import { ImportClass } from '../common/types';
 import { SACredential } from '../auth';
+import { DEFAULT_APPLICATION_NAME, SERVICE_MAP } from '../common/constants';
+import { GoogleSoapServiceOptions, ImportClass } from '../common/types';
+import { GoogleSoapService } from './googleSoap.service';
 
 export class AdManagerClient {
   private networkCode: number;
@@ -14,7 +14,10 @@ export class AdManagerClient {
     this.applicationName = applicationName || DEFAULT_APPLICATION_NAME;
   }
 
-  async getService<T extends keyof typeof SERVICE_MAP>(serviceName: T): Promise<ImportClass<typeof SERVICE_MAP, T>> {
+  async getService<T extends keyof typeof SERVICE_MAP>(
+    serviceName: T,
+    options: Pick<GoogleSoapServiceOptions, 'proxy'> = {},
+  ): Promise<ImportClass<typeof SERVICE_MAP, T>> {
     try {
       const token = await this.credential.getToken();
 
@@ -22,6 +25,7 @@ export class AdManagerClient {
         networkCode: this.networkCode,
         token: token as string,
         applicationName: this.applicationName,
+        ...options,
       }).createClient();
     } catch (err: any) {
       throw new Error(err);

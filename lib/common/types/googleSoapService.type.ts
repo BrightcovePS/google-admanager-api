@@ -1,3 +1,11 @@
+export type ProxyConfig = {
+  protocol: 'http' | 'socks5';
+  host: string;
+  port: number;
+  username?: string;
+  password?: string;
+};
+
 export type GoogleSoapServiceOptions = {
   /**
    * The network code of the network being addressed.
@@ -13,4 +21,9 @@ export type GoogleSoapServiceOptions = {
    *  OAuth2 access token
    */
   token: string;
+
+  /**
+   * Proxy config
+   */
+  proxy?: ProxyConfig;
 };
