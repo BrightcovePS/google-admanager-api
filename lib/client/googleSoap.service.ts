@@ -11,17 +11,19 @@ export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
   private token: string;
   private proxy?: ProxyConfig;
   private _client: Client;
+  private apiVersion: string;
 
-  constructor(service: T, options: GoogleSoapServiceOptions) {
+  constructor(service: T, options: GoogleSoapServiceOptions, apiVersion: string = API_VERSION) {
     this.service = service;
     this.applicationName = options.applicationName;
     this.networkCode = options.networkCode;
     this.token = options.token;
     this.proxy = options.proxy;
+    this.apiVersion = apiVersion;
   }
 
   public async createClient(): Promise<ImportClass<typeof SERVICE_MAP, T>> {
-    const serviceUrl = `https://ads.google.com/apis/ads/publisher/${API_VERSION}/${this.service}?wsdl`;
+    const serviceUrl = `https://ads.google.com/apis/ads/publisher/${this.apiVersion}/${this.service}?wsdl`;
 
     const client = await (async () => {
       if (this.proxy) {
@@ -67,7 +69,7 @@ export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
           'soapenv:actor': 'http://schemas.xmlsoap.org/soap/actor/next',
           'soapenv:mustUnderstand': 0,
           'xsi:type': 'ns1:SoapRequestHeader',
-          'xmlns:ns1': 'https://www.google.com/apis/ads/publisher/' + API_VERSION,
+          'xmlns:ns1': 'https://www.google.com/apis/ads/publisher/' + this.apiVersion,
           'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           'xmlns:soapenv': 'http://schemas.xmlsoap.org/soap/envelope/',
         },
