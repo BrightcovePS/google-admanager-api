@@ -58,7 +58,7 @@ export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
     });
 
     const services = SERVICE_MAP as any;
-
+    console.log(this._client.lastRequest);
     return new services[this.service](this._client);
   }
 
