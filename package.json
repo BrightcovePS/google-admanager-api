@@ -1,6 +1,6 @@
 {
   "name": "google-admanager-api",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Google Ad Manager API Client Library for NodeJs",
   "main": "dist/index",
   "types": "dist/index",
@@ -44,7 +44,7 @@
     "axios": "^1.6.8",
     "google-auth-library": "^7.14.0",
     "rimraf": "^5.0.5",
-    "soap": "^1.0.0",
+    "soap": "^1.0.3",
     "socks-proxy-agent": "^8.0.2"
   },
   "keywords": [
