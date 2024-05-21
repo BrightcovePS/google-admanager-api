@@ -17,7 +17,8 @@ export class AdManagerClient {
   async getService<T extends keyof typeof SERVICE_MAP>(
     serviceName: T,
     options: Pick<GoogleSoapServiceOptions, 'proxy'> = {},
-    apiVersion: string
+    apiVersion: string,
+    logLastRequest: boolean
   ): Promise<ImportClass<typeof SERVICE_MAP, T>> {
     try {
       const token = await this.credential.getToken();
@@ -28,7 +29,8 @@ export class AdManagerClient {
         applicationName: this.applicationName,
         ...options,
       },
-      apiVersion).createClient();
+      apiVersion,
+      logLastRequest).createClient();
     } catch (err: any) {
       throw new Error(err);
     }

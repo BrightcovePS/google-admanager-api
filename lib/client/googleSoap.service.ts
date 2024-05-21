@@ -12,14 +12,16 @@ export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
   private proxy?: ProxyConfig;
   private _client: Client;
   private apiVersion: string;
+  private logLastRequest: boolean;
 
-  constructor(service: T, options: GoogleSoapServiceOptions, apiVersion: string = API_VERSION) {
+  constructor(service: T, options: GoogleSoapServiceOptions, apiVersion: string = API_VERSION, logLastRequest: boolean = false) {
     this.service = service;
     this.applicationName = options.applicationName;
     this.networkCode = options.networkCode;
     this.token = options.token;
     this.proxy = options.proxy;
     this.apiVersion = apiVersion;
+    this.logLastRequest = logLastRequest;
   }
 
   public async createClient(): Promise<ImportClass<typeof SERVICE_MAP, T>> {
@@ -41,15 +43,26 @@ export class GoogleSoapService<T extends keyof typeof SERVICE_MAP> {
 
     if (this.token) client.setToken(this.token);
 
+    const logLastRequest = this.logLastRequest;
+
     this._client = new Proxy(client, {
       get: function get(target, propertyKey) {
         const method = propertyKey.toString();
 
         if (target.hasOwnProperty(method) && !['setToken'].includes(method)) {
           return async function run(dto: any = {}) {
-            const res = await promiseFromCallback((cb) => client[method](dto, cb));
-
-            return res?.rval || null;
+            try {
+              const res = await promiseFromCallback((cb) => client[method](dto, cb));
+              if (logLastRequest) {
+                console.log(client.lastRequest);
+              }
+              return res?.rval || null;
+            } catch (err) {
+              if (logLastRequest) {
+                console.log(client.lastRequest);
+              }
+              throw err;
+            }
           };
         } else {
           return target[method];
